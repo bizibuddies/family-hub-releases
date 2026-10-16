@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Family Hub</title>
+  <meta name="description" content="Family Hub is a private, home-made app for one family's touchscreen: calendar, kids' tasks, drawing and photos.">
+  <style>
+    :root { --bg: #f6f3ec; --card: #ffffff; --text: #1c232e; --muted: #5f6878; --line: #e3ddd0; --accent: #2563eb; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0b1222; --card: #141f38; --text: #f4f7fd; --muted: #a9b8d6; --line: #2a3b60; --accent: #74adff; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 28px 28px 20px; }
+    h1 { font-size: 2.2rem; margin: 0 0 4px; letter-spacing: -.02em; }
+    .lead { color: var(--muted); margin: 0 0 24px; font-size: 1.1rem; }
+    h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+    ul { padding-left: 1.2rem; margin: 0; }
+    li { margin: 4px 0; }
+    a { color: var(--accent); }
+    footer { margin-top: 28px; color: var(--muted); font-size: .95rem; display: flex; gap: 18px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <h1>Family Hub</h1>
+      <p class="lead">A private, home-made app for one family's touchscreen in the kitchen. It is not a commercial product and is not offered to the public.</p>
+
+      <h2>What it does</h2>
+      <ul>
+        <li><strong>Family calendar:</strong> shows the family's chosen Google calendars on a large screen and lets family members add or delete events.</li>
+        <li><strong>Kids' tasks:</strong> a daily checklist for the children.</li>
+        <li><strong>Doodle and whiteboard:</strong> drawing with fingers or a stylus, including notes over whatever is on the screen.</li>
+        <li><strong>Photos:</strong> a photo screensaver from a folder on the family's own computer.</li>
+      </ul>
+
+      <h2>How it uses Google</h2>
+      <p>When a family member chooses to connect their Google account, Family Hub asks for permission to see the list of their calendars and to view, add and delete events on the calendars they pick. It runs entirely on the family's own Windows computers. See the <a href="privacy.html">privacy policy</a> for details.</p>
+
+      <footer>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="https://github.com/bizibuddies/family-hub-releases/releases">Downloads</a>
+        <a href="https://github.com/bizibuddies/family-hub-releases/issues">Contact</a>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>

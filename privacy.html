@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy · Family Hub</title>
+  <meta name="description" content="How Family Hub uses Google Calendar data.">
+  <style>
+    :root { --bg: #f6f3ec; --card: #ffffff; --text: #1c232e; --muted: #5f6878; --line: #e3ddd0; --accent: #2563eb; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0b1222; --card: #141f38; --text: #f4f7fd; --muted: #a9b8d6; --line: #2a3b60; --accent: #74adff; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 20px 64px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 28px 28px 20px; }
+    h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.02em; }
+    .muted { color: var(--muted); }
+    h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+    ul { padding-left: 1.2rem; margin: 0; }
+    li { margin: 4px 0; }
+    code { font-size: .9em; overflow-wrap: anywhere; }
+    a { color: var(--accent); }
+    footer { margin-top: 28px; color: var(--muted); font-size: .95rem; display: flex; gap: 18px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <h1>Privacy Policy</h1>
+      <p class="muted">Family Hub · Effective October 16, 2026</p>
+
+      <p>Family Hub is a private app made by one family for its own use. It runs on the family's own Windows computers. This policy explains what it does with information from Google accounts that family members choose to connect.</p>
+
+      <h2>What Family Hub accesses</h2>
+      <p>Only if a family member signs in with Google and approves it, Family Hub requests:</p>
+      <ul>
+        <li><strong>Your email address</strong> (<code>openid</code>, <code>email</code>): to label which account is connected.</li>
+        <li><strong>Your list of calendars</strong> (<code>calendar.calendarlist.readonly</code>): so you can choose which calendars to show.</li>
+        <li><strong>Calendar events</strong> (<code>calendar.events</code>): to show events on the screen, and to add or delete an event when a family member asks it to.</li>
+      </ul>
+
+      <h2>How the information is used</h2>
+      <ul>
+        <li>Events are shown on the family's screen and held in the app's memory while it runs. They are not saved to disk or copied anywhere else.</li>
+        <li>Events are only added or deleted when a family member taps to do so.</li>
+        <li>Nothing is used for advertising, analytics, profiling or training any model.</li>
+      </ul>
+
+      <h2>Where it is stored, and who it is shared with</h2>
+      <ul>
+        <li>Everything stays on the family's own computer. Family Hub has no servers and sends your data nowhere except directly to Google's own services to read or change your calendar.</li>
+        <li>Google sign-in tokens are stored on that computer, encrypted with Windows' built-in protection (DPAPI).</li>
+        <li>Your data is not sold, shared or transferred to anyone.</li>
+      </ul>
+      <p>Family Hub's use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+      <h2>Removing access and deleting data</h2>
+      <ul>
+        <li>In Family Hub, open Settings → Calendars and tap <strong>Disconnect</strong> next to the account. This removes the stored sign-in from the computer and asks Google to revoke access.</li>
+        <li>You can also remove access at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+        <li>Uninstalling Family Hub removes the app; its settings folder can be deleted to remove everything it stored.</li>
+      </ul>
+
+      <h2>Children</h2>
+      <p>Children use Family Hub's checklist and drawing features, which do not use Google data. Google accounts are connected by a parent.</p>
+
+      <h2>Changes and contact</h2>
+      <p>If this policy changes, the new version will be posted on this page with a new date. Questions can be raised at <a href="https://github.com/bizibuddies/family-hub-releases/issues">github.com/bizibuddies/family-hub-releases/issues</a>.</p>
+
+      <footer>
+        <a href="index.html">Family Hub home</a>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>
