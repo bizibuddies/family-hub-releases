@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kids' Tasks · Family Hub</title>
+  <meta name="theme-color" content="#2563eb">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" href="icon.png">
+  <style>
+    :root { --bg: #f3efe6; --card: #fff; --soft: #f8f5ee; --line: #e3ddd0; --text: #1c232e; --muted: #6a7280; --accent: #2563eb; --danger: #dc2626; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0b1222; --card: #141f38; --soft: #1b2946; --line: #2a3b60; --text: #f4f7fd; --muted: #a9b8d6; --accent: #74adff; } }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.4 -apple-system, "Segoe UI", system-ui, sans-serif; }
+    body { padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 24px); }
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 14px 16px 10px; display: flex; align-items: center; gap: 8px; }
+    header .grow { flex: 1; min-width: 0; }
+    header h1 { margin: 0; font-size: 1.5rem; letter-spacing: -.02em; }
+    header small { color: var(--muted); display: block; }
+    .nav { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); display: grid; place-items: center; font-size: 1.2rem; }
+    .pill { height: 42px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font-weight: 600; }
+    main { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
+    .kid { background: var(--card); border: 1px solid var(--line); border-top: 5px solid var(--kc); border-radius: 18px; padding: 12px 12px 14px; }
+    .kid-head { display: flex; align-items: center; gap: 10px; padding: 2px 4px 10px; }
+    .kid-head .em { font-size: 1.8rem; }
+    .kid-head .nm { font-size: 1.3rem; font-weight: 750; flex: 1; }
+    .kid-head .ct { font-weight: 700; color: var(--muted); }
+    .task { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 14px; border: 2px solid var(--line); background: var(--soft); margin-bottom: 8px; }
+    .task .tap { flex: 1; display: flex; align-items: center; gap: 10px; background: none; border: 0; text-align: left; padding: 0; min-height: 44px; }
+    .task .em { font-size: 1.6rem; width: 2rem; text-align: center; }
+    .task .tt { flex: 1; font-weight: 650; }
+    .task .tt small { display: block; color: var(--muted); font-weight: 500; font-size: .8rem; }
+    .chk { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--kc); display: grid; place-items: center; color: #fff; font-weight: 800; flex: none; }
+    .task.done { background: color-mix(in srgb, var(--kc) 14%, var(--card)); border-color: color-mix(in srgb, var(--kc) 45%, var(--line)); }
+    .task.done .tt { text-decoration: line-through; color: var(--muted); }
+    .task.done .chk { background: var(--kc); }
+    .edit { width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 1.1rem; }
+    .add { width: 100%; min-height: 46px; border-radius: 14px; border: 2px dashed var(--line); background: none; color: var(--kc); font-weight: 700; }
+    .empty { color: var(--muted); text-align: center; padding: 10px; }
+    .center { min-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; }
+    .center .box { max-width: 340px; }
+    .big { width: 100%; min-height: 50px; border-radius: 14px; border: 0; background: var(--accent); color: #fff; font-weight: 700; font-size: 1.05rem; }
+    .muted { color: var(--muted); }
+    /* bottom sheet form */
+    .sheet-bg { position: fixed; inset: 0; background: rgba(10, 14, 22, .45); z-index: 20; display: flex; align-items: flex-end; }
+    .sheet { width: 100%; max-height: 92vh; overflow: auto; background: var(--card); border-radius: 20px 20px 0 0; padding: 16px 16px calc(env(safe-area-inset-bottom) + 16px); }
+    .sheet h2 { margin: 4px 0 12px; font-size: 1.25rem; }
+    label.f { display: block; font-weight: 650; font-size: .9rem; margin: 12px 0 6px; }
+    .in { width: 100%; min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--soft); font-size: 1.05rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { border: 1px solid var(--line); background: var(--soft); border-radius: 999px; padding: 8px 12px; font-weight: 600; font-size: .9rem; }
+    .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .emojis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+    .emojis button { height: 40px; font-size: 1.35rem; border-radius: 10px; border: 2px solid transparent; background: var(--soft); }
+    .emojis button.on { border-color: var(--accent); }
+    .acts { display: flex; gap: 8px; margin-top: 18px; }
+    .acts button { flex: 1; min-height: 48px; border-radius: 14px; border: 1px solid var(--line); background: var(--soft); font-weight: 700; }
+    .acts .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .acts .danger { color: var(--danger); }
+    #toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 20px); transform: translateX(-50%); background: #1c232e; color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 30; max-width: 90vw; }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="app"><div class="center"><div class="box muted">Loading…</div></div></div>
+  <div id="toast"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
