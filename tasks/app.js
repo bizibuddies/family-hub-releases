@@ -31,6 +31,17 @@ function appliesOn(t, date) {
     default: return true;
   }
 }
+// Time goal: set on the task, or read from its name ("Read for 20 minutes").
+function requiredMinutes(t) {
+  if (t.minutes != null) return Number(t.minutes) || 0;
+  const m = /(\d+)\s*(?:m|min|mins|minute|minutes)\b/i.exec(t.title || '');
+  if (m) return Number(m[1]);
+  const hr = /(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hour|hours)\b/i.exec(t.title || '');
+  return hr ? Math.round(Number(hr[1]) * 60) : 0;
+}
+const timerMs = (tm) => (tm?.ms || 0) + (tm?.since ? Math.max(0, Date.now() - tm.since) : 0);
+const mins = (ms) => Math.floor(ms / 60000);
+
 function repeatLabel(r) {
   switch (r?.type) {
     case 'once': return 'Just this day';
@@ -48,7 +59,7 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = ''; }, 2600);
 }
 
-const state = { user: null, kids: [], tasks: [], done: {}, date: new Date(), unsubs: [], unsubDone: null, denied: false };
+const state = { user: null, kids: [], tasks: [], done: {}, timers: {}, date: new Date(), unsubs: [], unsubDone: null, unsubTimers: null, denied: false };
 
 function friendlyError(e) {
   if (e?.code === 'permission-denied') return 'denied';
@@ -86,6 +97,7 @@ function stopListening() {
   for (const u of state.unsubs) u();
   state.unsubs = [];
   if (state.unsubDone) { state.unsubDone(); state.unsubDone = null; }
+  if (state.unsubTimers) { state.unsubTimers(); state.unsubTimers = null; }
 }
 
 function onErr(e) {
@@ -104,6 +116,21 @@ function listenDone() {
   if (state.unsubDone) state.unsubDone();
   const key = ymd(state.date);
   state.unsubDone = onSnapshot(doc(db, `done/${key}`), (s) => { state.done = { [key]: s.data() || {} }; render(); }, onErr);
+  if (state.unsubTimers) state.unsubTimers();
+  // Timer progress is extra: if it can't be read (older Family Hub version), just leave it out.
+  state.unsubTimers = onSnapshot(doc(db, `timers/${key}`), (s) => { state.timers = { [key]: s.data() || {} }; render(); }, () => { state.timers = {}; });
+}
+
+// Keep running timers' minutes fresh.
+setInterval(() => { if (Object.values(state.timers).some((m) => Object.values(m).some((tm) => tm?.since))) render(); }, 20000);
+
+function timerLabel(t, key, isDone) {
+  const need = requiredMinutes(t);
+  if (!need) return '';
+  const tm = state.timers[key]?.[t.id];
+  const ms = timerMs(tm);
+  if (isDone) return ms ? ` · ⏱ Did ${mins(ms)} min` : ` · ⏱ ${need} min`;
+  return ` · ⏱ ${mins(ms)} of ${need} min${tm?.since ? ' (running)' : ''}`;
 }
 
 // ---------- main view ----------
@@ -121,7 +148,7 @@ function render() {
       <div class="kid-head"><span class="em">${esc(k.emoji)}</span><span class="nm">${esc(k.name)}</span><span class="ct">${n}/${list.length}</span></div>
       ${list.length ? list.map((t) => `<div class="task ${done[t.id] ? 'done' : ''}">
           <button class="tap" data-toggle="${esc(t.id)}"><span class="em">${esc(t.emoji || '⭐')}</span>
-            <span class="tt">${esc(t.title)}<small>${esc(repeatLabel(t.repeat))}${t.byKid ? ` · ⭐ ${esc(k.name)}'s own` : ''}</small></span>
+            <span class="tt">${esc(t.title)}<small>${esc(repeatLabel(t.repeat))}${t.byKid ? ` · ⭐ ${esc(k.name)}'s own` : ''}${esc(timerLabel(t, key, !!done[t.id]))}</small></span>
             <span class="chk">${done[t.id] ? '✓' : ''}</span></button>
           <button class="edit" data-edit="${esc(t.id)}" aria-label="Edit">✎</button>
         </div>`).join('') : '<div class="empty">No tasks on this day.</div>'}
