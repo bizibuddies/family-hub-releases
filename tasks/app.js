@@ -183,6 +183,7 @@ async function toggle(taskId) {
 // ---------- add / edit sheet ----------
 function editTask(task, kidId) {
   const t = task ? JSON.parse(JSON.stringify(task)) : { id: uid(), kidId, title: '', emoji: '⭐', repeat: { type: 'daily' } };
+  const who = new Set([t.kidId]); // one or more children; each gets a copy
   const bg = document.createElement('div');
   bg.className = 'sheet-bg';
   const close = () => bg.remove();
@@ -192,7 +193,7 @@ function editTask(task, kidId) {
     bg.innerHTML = `<div class="sheet">
       <h2>${task ? 'Edit task' : 'New task'}</h2>
       <label class="f">Task</label><input class="in" id="title" maxlength="60" placeholder="e.g. Brush teeth" value="${esc(t.title)}">
-      <label class="f">Who</label><div class="chips">${state.kids.map((k) => `<button class="chip ${t.kidId === k.id ? 'on' : ''}" data-kid="${esc(k.id)}">${esc(k.emoji)} ${esc(k.name)}</button>`).join('')}</div>
+      <label class="f">Who ${task ? '(another child gets a copy)' : '(pick one or more)'}</label><div class="chips">${state.kids.map((k) => `<button class="chip ${who.has(k.id) ? 'on' : ''}" data-kid="${esc(k.id)}">${esc(k.emoji)} ${esc(k.name)}</button>`).join('')}</div>
       <label class="f">When</label><div class="chips">${[['daily', 'Every day'], ['weekdays', 'School days'], ['weekends', 'Weekends'], ['days', 'Pick days'], ['once', 'One day']].map(([v, l]) => `<button class="chip ${r.type === v ? 'on' : ''}" data-rep="${v}">${l}</button>`).join('')}</div>
       ${r.type === 'days' ? `<div class="chips" style="margin-top:6px">${DAYS.map((d, i) => `<button class="chip ${(r.days || []).includes(i) ? 'on' : ''}" data-day="${i}">${d}</button>`).join('')}</div>` : ''}
       ${r.type === 'once' ? `<input class="in" type="date" id="date" style="margin-top:6px" value="${esc(r.date || ymd(state.date))}">` : ''}
@@ -201,7 +202,7 @@ function editTask(task, kidId) {
     </div>`;
     const title = bg.querySelector('#title');
     title.oninput = () => { t.title = title.value; };
-    for (const b of bg.querySelectorAll('[data-kid]')) b.onclick = () => { t.kidId = b.dataset.kid; draw(); };
+    for (const b of bg.querySelectorAll('[data-kid]')) b.onclick = () => { const id = b.dataset.kid; if (who.has(id)) { if (who.size > 1) who.delete(id); } else who.add(id); draw(); };
     for (const b of bg.querySelectorAll('[data-rep]')) b.onclick = () => { t.repeat = { type: b.dataset.rep, days: t.repeat.days || [state.date.getDay()], date: t.repeat.date || ymd(state.date) }; draw(); };
     for (const b of bg.querySelectorAll('[data-day]')) b.onclick = () => { const s = new Set(t.repeat.days || []); const i = +b.dataset.day; if (s.has(i)) s.delete(i); else s.add(i); t.repeat.days = [...s].sort(); draw(); };
     for (const b of bg.querySelectorAll('[data-emoji]')) b.onclick = () => { t.emoji = b.dataset.emoji; draw(); };
@@ -210,12 +211,25 @@ function editTask(task, kidId) {
     bg.querySelector('#save').onclick = async () => {
       t.title = title.value.trim();
       if (!t.title) { title.focus(); toast('Type what the task is first.'); return; }
-      if (!task) t.order = Math.max(-1, ...state.tasks.filter((x) => x.kidId === t.kidId).map((x) => x.order ?? 0)) + 1;
       const rep = { type: t.repeat.type };
       if (rep.type === 'days') rep.days = t.repeat.days || [];
       if (rep.type === 'once') rep.date = t.repeat.date || ymd(state.date);
       t.repeat = rep;
-      try { await setDoc(doc(db, `tasks/${t.id}`), JSON.parse(JSON.stringify(t))); close(); toast(task ? 'Saved' : 'Added'); } catch (e) { onErr(e); }
+      const kids = state.kids.map((k) => k.id).filter((id) => who.has(id));
+      const nextOrder = (kidId) => Math.max(-1, ...state.tasks.filter((x) => x.kidId === kidId).map((x) => x.order ?? 0)) + 1;
+      const writes = [];
+      let rest = kids;
+      if (task) { // the edited task stays with its child if still picked, otherwise it moves
+        const keep = kids.includes(task.kidId) ? task.kidId : kids[0];
+        writes.push({ ...t, kidId: keep });
+        rest = kids.filter((id) => id !== keep);
+      }
+      for (const kidId of rest) writes.push({ ...t, id: uid(), kidId, order: nextOrder(kidId) });
+      try {
+        await Promise.all(writes.map((w) => setDoc(doc(db, `tasks/${w.id}`), JSON.parse(JSON.stringify(w)))));
+        close();
+        toast(kids.length > 1 ? `Added for ${kids.map((id) => state.kids.find((k) => k.id === id)?.name).join(' and ')}` : (task ? 'Saved' : 'Added'));
+      } catch (e) { onErr(e); }
     };
     const del = bg.querySelector('#del');
     if (del) del.onclick = async () => {
