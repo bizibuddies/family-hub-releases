@@ -146,9 +146,9 @@ function render() {
     const n = list.filter((t) => done[t.id]).length;
     return `<section class="kid" style="--kc:${esc(k.color)}">
       <div class="kid-head"><span class="em">${esc(k.emoji)}</span><span class="nm">${esc(k.name)}</span><span class="ct">${n}/${list.length}</span></div>
-      ${list.length ? list.map((t) => `<div class="task ${done[t.id] ? 'done' : ''}">
+      ${list.length ? list.map((t) => `<div class="task ${done[t.id] ? 'done' : ''} ${t.byKid ? 'mine' : ''}">
           <button class="tap" data-toggle="${esc(t.id)}"><span class="em">${esc(t.emoji || '⭐')}</span>
-            <span class="tt">${esc(t.title)}<small>${esc(repeatLabel(t.repeat))}${t.byKid ? ` · ⭐ ${esc(k.name)}'s own` : ''}${esc(timerLabel(t, key, !!done[t.id]))}</small></span>
+            <span class="tt">${esc(t.title)}<small>${esc(repeatLabel(t.repeat))}${esc(timerLabel(t, key, !!done[t.id]))}</small></span>
             <span class="chk">${done[t.id] ? '✓' : ''}</span></button>
           <button class="edit" data-edit="${esc(t.id)}" aria-label="Edit">✎</button>
         </div>`).join('') : '<div class="empty">No tasks on this day.</div>'}
