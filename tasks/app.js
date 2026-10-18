@@ -7,7 +7,7 @@ import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, deleteFie
 import { firebaseConfig } from './config.js';
 
 const EMOJIS = ['🪥', '🛏️', '👕', '🎒', '📚', '✏️', '🎹', '🎻', '⚽', '🏊', '🧹', '🧺', '🍽️', '🐶', '🐱', '🌱', '🗑️', '🚿', '🦷', '💊',
-  '🥣', '🍎', '💧', '📖', '🧮', '🔬', '🎨', '🧩', '💻', '📝', '🏃', '🚲', '🧘', '😴', '🙏', '💌', '🛁', '🧦', '⭐', '🎯'];
+  '🥣', '🍎', '💧', '📖', '🧮', 'π', '🔬', '🎨', '🧩', '💻', '📝', '🏃', '🚲', '🧘', '😴', '🙏', '💌', '🛁', '🧦', '⭐', '🎯'];
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const app = initializeApp(firebaseConfig);
