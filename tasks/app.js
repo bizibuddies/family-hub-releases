@@ -59,7 +59,8 @@ function toast(msg) {
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = ''; }, 2600);
 }
 
-const state = { user: null, kids: [], tasks: [], done: {}, timers: {}, date: new Date(), unsubs: [], unsubDone: null, unsubTimers: null, denied: false };
+const state = { user: null, kids: [], tasks: [], done: {}, timers: {}, slots: {}, date: new Date(), unsubs: [], unsubDone: null, unsubTimers: null, unsubSlots: null, denied: false,
+  view: (() => { try { return localStorage.getItem('phone-view') || 'list'; } catch { return 'list'; } })() };
 
 function friendlyError(e) {
   if (e?.code === 'permission-denied') return 'denied';
@@ -98,6 +99,7 @@ function stopListening() {
   state.unsubs = [];
   if (state.unsubDone) { state.unsubDone(); state.unsubDone = null; }
   if (state.unsubTimers) { state.unsubTimers(); state.unsubTimers = null; }
+  if (state.unsubSlots) { state.unsubSlots(); state.unsubSlots = null; }
 }
 
 function onErr(e) {
@@ -119,6 +121,55 @@ function listenDone() {
   if (state.unsubTimers) state.unsubTimers();
   // Timer progress is extra: if it can't be read (older Family Hub version), just leave it out.
   state.unsubTimers = onSnapshot(doc(db, `timers/${key}`), (s) => { state.timers = { [key]: s.data() || {} }; render(); }, () => { state.timers = {}; });
+  // Times the kids planned in the Family Hub calendar view (older versions don't have them).
+  if (state.unsubSlots) state.unsubSlots();
+  state.unsubSlots = onSnapshot(doc(db, `slots/${key}`), (s) => { state.slots = { [key]: s.data() || {} }; render(); }, () => { state.slots = {}; });
+}
+
+// ---------- calendar view: the day as a timeline, one column per child ----------
+const ROW = 22; // px per 15 minutes
+const hm = (m) => { const h = Math.floor(m / 60); return `${((h + 11) % 12) + 1}:${pad(m % 60)}${h < 12 ? 'am' : 'pm'}`; };
+const minuteOf = (ms) => { const d = new Date(ms); return d.getHours() * 60 + d.getMinutes(); };
+const blockMinutes = (t) => Math.max(15, Math.ceil((requiredMinutes(t) || 15) / 15) * 15);
+
+// Where a task sits and what to say about it (planned, started, or what really happened).
+function placed(t, key) {
+  const start = state.slots[key]?.[t.id];
+  if (start == null) return null;
+  const tm = state.timers[key]?.[t.id];
+  const doneAt = state.done[key]?.[t.id];
+  const endAt = doneAt ? (tm?.finishedAt || doneAt) : null;
+  let end = start + blockMinutes(t); let label = hm(start);
+  if (tm?.startedAt && endAt) { end = Math.max(minuteOf(endAt), start + 15); label = `${hm(minuteOf(tm.startedAt))}–${hm(minuteOf(endAt))}`; }
+  else if (tm?.startedAt) label = `Started ${hm(minuteOf(tm.startedAt))}`;
+  else if (doneAt) label = `Done ${hm(minuteOf(doneAt))}`;
+  return { start, end, label, done: !!doneAt };
+}
+
+function calendarHtml(key) {
+  const weekend = [0, 6].includes(state.date.getDay());
+  let from = weekend ? 9 * 60 : 15 * 60; let to = 21 * 60; // as on the screen (no-school days need the screen's calendar)
+  const cols = state.kids.map((k) => {
+    const list = state.tasks.filter((t) => t.kidId === k.id && appliesOn(t, state.date)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const blocks = []; const waiting = [];
+    for (const t of list) { const p = placed(t, key); if (p) blocks.push({ t, ...p }); else waiting.push(t); }
+    for (const b of blocks) { from = Math.min(from, Math.floor(b.start / 60) * 60); to = Math.max(to, Math.ceil(b.end / 60) * 60); }
+    return { k, blocks, waiting };
+  });
+  const y = (m) => ((m - from) / 15) * ROW;
+  const hours = []; for (let m = from; m <= to; m += 60) hours.push(`<div class="cal-hour" style="top:${y(m)}px"><span>${hm(m).replace(':00', '')}</span></div>`);
+  const now = new Date(); const nowM = now.getHours() * 60 + now.getMinutes();
+  const nowLine = ymd(now) === key && nowM > from && nowM < to ? `<div class="cal-now" style="top:${y(nowM)}px"></div>` : '';
+  const body = cols.map((c, i) => c.blocks.map((b) => `<div class="cal-task ${b.done ? 'done' : ''} ${y(b.end) - y(b.start) < ROW * 2 ? 'short' : ''}" style="--kc:${esc(c.k.color)};top:${y(b.start)}px;height:${Math.max(ROW - 2, y(b.end) - y(b.start) - 2)}px;left:calc(44px + (100% - 48px) * ${i / cols.length});width:calc((100% - 48px) / ${cols.length} - 4px)">
+      <b>${esc(b.t.emoji || '⭐')} ${esc(b.t.title)}</b><small>${esc(b.label)}</small></div>`).join('')).join('');
+  const names = cols.map((c) => `<span style="--kc:${esc(c.k.color)}">${esc(c.k.name)}</span>`).join('');
+  const waiting = cols.filter((c) => c.waiting.length).map((c) => `<div class="cal-wait" style="--kc:${esc(c.k.color)}"><b>${esc(c.k.name)}, not planned yet:</b> ${c.waiting.map((t) => `${esc(t.emoji || '⭐')} ${esc(t.title)}`).join(', ')}</div>`).join('');
+  return `<section class="cal">
+      <div class="cal-names">${names}</div>
+      <div class="cal-grid" style="height:${y(to) + 8}px">${hours.join('')}${nowLine}${body}</div>
+      ${waiting}
+      <p class="muted" style="font-size:.8rem;margin:.6em 0 0">The girls plan their times on the Family Hub screen (Tasks → Calendar).</p>
+    </section>`;
 }
 
 // Keep running timers' minutes fresh.
@@ -161,7 +212,8 @@ function render() {
       <button class="pill" id="today">Today</button>
       <button class="nav" id="next" aria-label="Next day">›</button>
     </header>
-    <main>${kidsHtml || '<div class="empty">Waiting for the Family Hub screen to connect…</div>'}
+    <div class="views"><button class="chip ${state.view === 'list' ? 'on' : ''}" data-view="list">List</button><button class="chip ${state.view === 'calendar' ? 'on' : ''}" data-view="calendar">Calendar</button></div>
+    <main>${!state.kids.length ? '<div class="empty">Waiting for the Family Hub screen to connect…</div>' : state.view === 'calendar' ? calendarHtml(key) : kidsHtml}
       <p class="muted" style="text-align:center;font-size:.85rem">Signed in as ${esc(state.user.email)} · <a href="#" id="out" style="color:inherit">Sign out</a></p>
     </main>`;
   const shift = (n) => { state.date = new Date(state.date.getFullYear(), state.date.getMonth(), state.date.getDate() + n); listenDone(); render(); };
@@ -169,6 +221,7 @@ function render() {
   document.getElementById('next').onclick = () => shift(1);
   document.getElementById('today').onclick = () => { state.date = new Date(); listenDone(); render(); };
   document.getElementById('out').onclick = (e) => { e.preventDefault(); signOut(auth); };
+  for (const b of $app.querySelectorAll('[data-view]')) b.onclick = () => { state.view = b.dataset.view; try { localStorage.setItem('phone-view', state.view); } catch { /* ignore */ } render(); };
   for (const b of $app.querySelectorAll('[data-toggle]')) b.onclick = () => toggle(b.dataset.toggle);
   for (const b of $app.querySelectorAll('[data-edit]')) b.onclick = () => editTask(state.tasks.find((t) => t.id === b.dataset.edit));
   for (const b of $app.querySelectorAll('[data-add]')) b.onclick = () => editTask(null, b.dataset.add);

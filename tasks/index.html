@@ -41,6 +41,25 @@
     .edit { width: 40px; height: 40px; border: 0; background: none; color: var(--muted); font-size: 1.1rem; }
     .add { width: 100%; min-height: 46px; border-radius: 14px; border: 2px dashed var(--line); background: none; color: var(--kc); font-weight: 700; }
     .empty { color: var(--muted); text-align: center; padding: 10px; }
+    /* List / Calendar switch and the day timeline */
+    .views { display: flex; gap: 6px; padding: 0 16px 8px; position: sticky; top: 66px; z-index: 4; background: var(--bg); }
+    .cal { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 10px 10px 14px; }
+    .cal-names { display: flex; padding-left: 44px; gap: 4px; margin-bottom: 6px; }
+    .cal-names span { flex: 1; text-align: center; font-weight: 800; color: var(--kc); border-bottom: 3px solid var(--kc); padding-bottom: 2px; }
+    .cal-grid { position: relative; }
+    .cal-hour { position: absolute; left: 0; right: 0; border-top: 1px solid var(--line); }
+    .cal-hour span { position: absolute; left: 0; top: -.6em; font-size: .7rem; color: var(--muted); background: var(--card); padding-right: 4px; }
+    .cal-now { position: absolute; left: 40px; right: 0; border-top: 2px solid #ef4444; z-index: 2; }
+    .cal-task { position: absolute; overflow: hidden; border-radius: 8px; border: 2px solid var(--kc); background: color-mix(in srgb, var(--kc) 20%, var(--card)); padding: 1px 6px; font-size: .8rem; line-height: 1.15; }
+    /* title and time on one line, so even a 15-minute block shows both */
+    .cal-task b { display: block; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-task small { display: block; color: var(--muted); font-size: .72rem; white-space: nowrap; }
+    /* a short block: title and time on one line */
+    .cal-task.short { white-space: nowrap; text-overflow: ellipsis; }
+    .cal-task.short b, .cal-task.short small { display: inline; }
+    .cal-task.short small { margin-left: 4px; }
+    .cal-task.done { opacity: .6; } .cal-task.done b { text-decoration: line-through; }
+    .cal-wait { margin-top: 8px; font-size: .85rem; border-left: 4px solid var(--kc); padding-left: 8px; }
     .center { min-height: 70vh; display: grid; place-items: center; text-align: center; padding: 24px; }
     .center .box { max-width: 340px; }
     .big { width: 100%; min-height: 50px; border-radius: 14px; border: 0; background: var(--accent); color: #fff; font-weight: 700; font-size: 1.05rem; }
