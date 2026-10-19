@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Privacy Policy · Family Hub</title>
-  <meta name="description" content="How Family Hub uses Google Calendar data.">
+  <meta name="description" content="How Family Hub uses Google Calendar and Google Sheets data.">
   <style>
     :root { --bg: #f6f3ec; --card: #ffffff; --text: #1c232e; --muted: #5f6878; --line: #e3ddd0; --accent: #2563eb; }
     @media (prefers-color-scheme: dark) { :root { --bg: #0b1222; --card: #141f38; --text: #f4f7fd; --muted: #a9b8d6; --line: #2a3b60; --accent: #74adff; } }
@@ -36,18 +36,20 @@
         <li><strong>Your email address</strong> (<code>openid</code>, <code>email</code>): to label which account is connected.</li>
         <li><strong>Your list of calendars</strong> (<code>calendar.calendarlist.readonly</code>): so you can choose which calendars to show.</li>
         <li><strong>Calendar events</strong> (<code>calendar.events</code>): to show events on the screen, and to add or delete an event when a family member asks it to.</li>
+        <li><strong>Google Sheets</strong> (<code>spreadsheets</code>): to show the swim club's attendance sheet that the family uses, and to mark the family's own children as swimming or skipping a practice when a family member taps to do so. Family Hub only opens the one sheet set in its Settings and only changes the family's own children's cells.</li>
       </ul>
 
       <h2>How the information is used</h2>
       <ul>
         <li>Events are shown on the family's screen and held in the app's memory while it runs. They are not saved to disk or copied anywhere else.</li>
         <li>Events are only added or deleted when a family member taps to do so.</li>
+        <li>The attendance sheet is shown on the family's screen and held in memory while the app runs; a cell is only changed when a family member taps Swim or Skip.</li>
         <li>Nothing is used for advertising, analytics, profiling or training any model.</li>
       </ul>
 
       <h2>Where it is stored, and who it is shared with</h2>
       <ul>
-        <li>Everything stays on the family's own computer. Family Hub has no servers and sends your data nowhere except directly to Google's own services to read or change your calendar.</li>
+        <li>Everything stays on the family's own computer. Family Hub has no servers and sends your data nowhere except directly to Google's own services to read or change your calendar or the attendance sheet.</li>
         <li>Google sign-in tokens are stored on that computer, encrypted with Windows' built-in protection (DPAPI).</li>
         <li>Your data is not sold, shared or transferred to anyone.</li>
       </ul>
