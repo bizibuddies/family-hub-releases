@@ -130,7 +130,7 @@ function listenDone() {
 const ROW = 22; // px per 15 minutes
 const hm = (m) => { const h = Math.floor(m / 60); return `${((h + 11) % 12) + 1}:${pad(m % 60)}${h < 12 ? 'am' : 'pm'}`; };
 const minuteOf = (ms) => { const d = new Date(ms); return d.getHours() * 60 + d.getMinutes(); };
-const blockMinutes = (t) => Math.max(15, Math.ceil((requiredMinutes(t) || 15) / 15) * 15);
+const blockMinutes = (t) => Math.max(15, Math.ceil((requiredMinutes(t) || 30) / 15) * 15); // no timer: 30 minutes
 
 // Where a task sits and what to say about it (planned, started, or what really happened).
 function placed(t, key) {
