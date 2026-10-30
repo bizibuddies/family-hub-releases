@@ -148,12 +148,12 @@ function placed(t, key) {
 
 function calendarHtml(key) {
   const weekend = [0, 6].includes(state.date.getDay());
-  let from = weekend ? 9 * 60 : 15 * 60; let to = 21 * 60; // as on the screen (no-school days need the screen's calendar)
+  let from = weekend ? 9 * 60 : 15 * 60; let to = 21 * 60 + 30; // 9:30pm, as on the screen (no-school days need the screen's calendar)
   const cols = state.kids.map((k) => {
     const list = state.tasks.filter((t) => t.kidId === k.id && appliesOn(t, state.date)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     const blocks = []; const waiting = [];
     for (const t of list) { const p = placed(t, key); if (p) blocks.push({ t, ...p }); else waiting.push(t); }
-    for (const b of blocks) { from = Math.min(from, Math.floor(b.start / 60) * 60); to = Math.max(to, Math.ceil(b.end / 60) * 60); }
+    for (const b of blocks) { from = Math.min(from, Math.floor(b.start / 60) * 60); to = Math.max(to, Math.ceil(b.end / 30) * 30); }
     return { k, blocks, waiting };
   });
   const y = (m) => ((m - from) / 15) * ROW;
