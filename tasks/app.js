@@ -31,13 +31,30 @@ function appliesOn(t, date) {
     default: return true;
   }
 }
-// Time goal: set on the task, or read from its name ("Read for 20 minutes").
+// A time written in a task's name, in English or Korean: "Read for 20 minutes",
+// "Piano 1 hr 30 min", "피아노 20분", "수학 1시간 반", "한 시간", "삼십 분".
+// Korean number words count only as whole words, so "구분하기" isn't 9 minutes.
+const KO_DIGITS = '일이삼사오육칠팔구';
+const KO_NATIVE = { 한: 1, 두: 2, 세: 3, 네: 4, 다섯: 5 };
+const TIME_NUM = '(?:(\\d+(?:\\.\\d+)?)|(?:^|[^가-힣])([이삼사오육칠팔구]?십[일이삼사오육칠팔구]?|한|두|세|네|다섯))';
+const HOURS_RE = new RegExp(`${TIME_NUM}\\s*(?:(?:h|hr|hrs|hour|hours)\\b|시간(\\s*반)?)`, 'i');
+const MINS_RE = new RegExp(`${TIME_NUM}\\s*(?:(?:m|min|mins|minute|minutes)\\b|분)`, 'i');
+function timeNumber(digits, word) {
+  if (digits) return Number(digits);
+  if (word in KO_NATIVE) return KO_NATIVE[word];
+  const [tens, ones] = word.split('십'); // 삼십오 -> 35
+  return (tens ? KO_DIGITS.indexOf(tens) + 1 : 1) * 10 + (ones ? KO_DIGITS.indexOf(ones) + 1 : 0);
+}
+function minutesInName(title) {
+  const hr = HOURS_RE.exec(title || ''); const mn = MINS_RE.exec(title || '');
+  const hours = hr ? timeNumber(hr[1], hr[2]) + (hr[3] ? 0.5 : 0) : 0;
+  return Math.round(hours * 60 + (mn ? timeNumber(mn[1], mn[2]) : 0));
+}
+
+// Time goal: set on the task, or read from its name (see above).
 function requiredMinutes(t) {
   if (t.minutes != null) return Number(t.minutes) || 0;
-  const m = /(\d+)\s*(?:m|min|mins|minute|minutes)\b/i.exec(t.title || '');
-  if (m) return Number(m[1]);
-  const hr = /(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hour|hours)\b/i.exec(t.title || '');
-  return hr ? Math.round(Number(hr[1]) * 60) : 0;
+  return minutesInName(t.title);
 }
 const timerMs = (tm) => (tm?.ms || 0) + (tm?.since ? Math.max(0, Date.now() - tm.since) : 0);
 const mins = (ms) => Math.floor(ms / 60000);
